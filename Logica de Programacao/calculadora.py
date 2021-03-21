@@ -24,10 +24,11 @@ class Calculadora:
     self.frame_vetor = Frame(raiz)
     self.frame_botoes = Frame(raiz)
     #Vetor para ir acrescentando os números digitdos
-    self.vetor = list()
+    self.digitos_texto = list()
+    self.m_mais_menos = list()
     self.valor_hist = StringVar()
     self.valor_texto = StringVar()
-    #self.valor_texto.set = self.vetor
+    #self.valor_texto.set = self.digitos_texto
     self.label_hist = Label(self.frame_hist, textvariable = self.valor_hist, font=("Arial Black", "12"),
                   width=23, height=1, anchor="e")
     self.label_hist.grid(row=0, )
@@ -53,83 +54,71 @@ class Calculadora:
     #Criando demais botões
     criar_botao(self,"mais_menos","+/-",5,0,"self.mais_menos")
     criar_botao(self,"virgula",",",5,2,"partial(self.preenche_tela,',')")
-    criar_botao(self,"divisao","÷",1,3,"partial(self.preenche_tela,'/')",bg="gray24")
-    criar_botao(self,"multiplicacao","X",2,3,"partial(self.preenche_tela,'*')",bg="gray24")
-    criar_botao(self,"subtracao","-",3,3,"partial(self.preenche_tela,'-')",bg="gray24")
-    criar_botao(self,"soma","+",4,3,"partial(self.preenche_tela,'+')",bg="gray24")
-    criar_botao(self,"igual","=",5,3,"partial(self.preenche_tela,'=')",bg="blue")
-    criar_botao(self,"memoria_mais","M+",1,0,"self.memory_add",bg="gray24")
-    criar_botao(self,"memoria_menos","M-",1,1,"self.memory_add",bg="gray24")
-    criar_botao(self,"memoria_armazena","MS",1,2,"self.memoria_armazena",bg="gray24")
+    criar_botao(self,"divisao","÷",1,3,"partial(self.calcula,'/')",bg="gray24")
+    criar_botao(self,"multiplicacao","X",2,3,"partial(self.calcula,'*')",bg="gray24")
+    criar_botao(self,"subtracao","-",3,3,"partial(self.calcula,'-')",bg="gray24")
+    criar_botao(self,"soma","+",4,3,"partial(self.calcula,'+')",bg="gray24")
+    criar_botao(self,"igual","=",5,3,"partial(self.calcula,'=')",bg="blue")
+    criar_botao(self,"memoria_mais","M+",1,0,"partial(self.salvar_memoria,'+')",bg="gray24")
+    criar_botao(self,"memoria_menos","M-",1,1,"partial(self.salvar_memoria,'-')",bg="gray24")
+    criar_botao(self,"memoria_armazena","MS",1,2,"partial(self.salvar_memoria,'=')",bg="gray24")
 
   def mostra_valor(self):
-    self.tela = ''.join(map(str, self.vetor)) 
+    self.tela = ''.join(map(str, self.digitos_texto)) 
     self.valor_texto.set(self.tela)
   
   def preenche_tela(self,valor):
-    if (valor == ",") and ("," in self.vetor): 
+    if (valor == ",") and ("," in self.digitos_texto): 
       pass
-    elif valor in ["+","-","*","/","="]:
-      temp_hist = self.valor_hist.get().replace(',','.')
-      temp_valor_vetor = self.valor_texto.get().replace(',','.')
-      if temp_hist == "":
-        self.valor_hist.set(self.tela+valor)
-        self.valor_texto.set("")
-        self.vetor.clear()
-      else:
-        try:
-          calculo = eval("{}{}".format(temp_hist,temp_valor_vetor))
-        except ZeroDivisionError:   
-          calculo = "Impossível dividir por zero"
-        #print(calculo)
-        self.valor_texto.set(str(calculo).replace('.',','))
-        if valor == "=":
-          self.valor_hist.set("")
-          #self.valor_texto.set(self.tela)
-        else:
-          self.valor_hist.set(self.tela+valor)
-        self.vetor.clear()
     else:
-      self.vetor.append(valor)
+      self.digitos_texto.append(valor)
       self.mostra_valor()
 
-  def mais_menos(self):
-    if self.vetor[0]=="-":
-      self.vetor.pop(0)
+  def calcula(self,valor):
+    #self.mostra_valor()
+    temp_hist = self.valor_hist.get().replace(',','.')
+    temp_valor_vetor = self.valor_texto.get().replace(',','.')
+    if temp_hist == "":
+      if valor == "=":
+        pass
+      else:
+        self.valor_hist.set(self.valor_texto.get().replace(',','.')+valor)
+        self.valor_texto.set("")
+        self.digitos_texto.clear()
     else:
-      self.vetor.insert(0,"-")
+      try:
+        calculo = eval("{}{}".format(temp_hist,temp_valor_vetor))
+      except ZeroDivisionError:   
+        calculo = "Impossível dividir por zero"
+      #print(calculo)
+      self.valor_texto.set(str(calculo).replace('.',','))
+      if valor == "=":
+        self.valor_hist.set("")
+        #self.valor_texto.set(self.tela)
+      else:
+        self.valor_hist.set(str(calculo).replace('.',',')+valor)
+      self.digitos_texto.clear()
+      #self.digitos_texto = list(self.valor_texto.get())
+  
+  def mais_menos(self):
+    if (not self.digitos_texto) or (self.digitos_texto[0]!="-"):
+      self.digitos_texto.insert(0,"-")
+    else:
+      self.digitos_texto.pop(0) 
     self.mostra_valor()
 
-  def fazer_operacao(self,operacao):
-    self.valor_hist[0] = float(self.tela.replace(',','.'))
-    self.valor_texto.set("")
-
-  
-  def soma(self):
-    #Receber valor de self.vetor
-    #deixar preencher tela
-    #igual, soma, divide e multiplica = soma anterior
-    pass
-
-  def multiplicacao(self):
-    #Receber valor de self.vetor
-    #deixar preencher tela
-    #igual, soma, divide e multiplica = multiplicacao anterior
-    pass
-
-  def divisao(self):
-    pass
-
-  def subtracao(self):
-    pass
-  def memory_add(self):
-    print(float(self.tela.replace(',','.')))
-
-  def memory_subtract(self):
-    pass
-  def memoria_armazena(self):
-    self.store = float(self.tela.replace(',','.'))
-    print(self.store)
+  def salvar_memoria(self,sinal):
+    self.valor_salvar = self.valor_texto.get()
+    if sinal == "=":
+      self.ms = self.valor_texto.get()
+      self.ms = self.ms.replace(',','.')
+      print("Valor salvo em MS: " + str(self.ms))
+      self.digitos_texto.clear()
+    else:
+      self.m_mais_menos.append(eval("float({}{})".format(sinal,self.valor_salvar.replace(',','.'))))
+      print("Lista de Valores Salvos: " + ','.join(str(x) for x in self.m_mais_menos))
+      print("Soma dos Valores: " + str(sum(self.m_mais_menos)))
+      self.digitos_texto.clear()
 
 raiz = Tk()
 raiz.title("Calculadora 0.1 - Igor Muniz")
